@@ -89,8 +89,12 @@ function M.get_current_file()
   if not file or file == "" or vim.fn.filereadable(file) ~= 1 then
     return nil
   end
+
+  local _, relative_path = util.get_project_root_and_relative_path(file)
+
   return {
     path = file,
+    relative_path = relative_path,
     name = vim.fn.fnamemodify(file, ":t"),
     extension = vim.fn.fnamemodify(file, ":e")
   }
@@ -135,15 +139,21 @@ function M.get_current_selection()
   }
 end
 
-function M.format_message(prompt)
+function M.format_instructions()
+  return template.render_instructions({
+    custom_instructions = '' -- nothing for now
+  })
+end
+
+function M.format_prompt(prompt)
   local delta_context = M.delta_context()
   delta_context.prompt = prompt
-  return template.render_template(delta_context)
+  return template.render_prompt(delta_context)
 end
 
 function M.extract_from_message(text)
   local context = {
-    prompt = template.extract_tag('user-query', text) or text,
+    prompt = template.extract_tag('user-query', text) or vim.trim(text),
     selected_text = template.extract_tag('manually-added-selection', text)
   }
   return context

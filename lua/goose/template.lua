@@ -87,16 +87,85 @@ function M.cleanup_indentation(template)
   return table.concat(res, "\n")
 end
 
-function M.render_template(template_vars)
+function M.render_template(template_path, template_vars)
   local plugin_root = get_plugin_root()
-  local template_path = plugin_root .. "/template/prompt.tpl"
+  local full_template_path = plugin_root .. "/" .. template_path
 
-  local template = read_template(template_path)
+  local template = read_template(full_template_path)
   if not template then return nil end
 
-  template = M.cleanup_indentation(template)
+  -- Only clean up indentation for the prompt template
+  if template_path == "template/prompt.tpl" then
+    template = M.cleanup_indentation(template)
+  end
 
   return Renderer.render(template, template_vars)
+end
+
+function M.render_prompt(context_vars)
+  return M.render_template("template/prompt.tpl", context_vars)
+end
+
+function M.render_instructions(context_vars)
+  return M.render_template("template/instructions.tpl", context_vars)
+end
+
+-- Properly indent a multi-line string for YAML block scalar inclusion
+-- This ensures all lines have consistent indentation to maintain YAML validity
+function M.indent_for_yaml(text, indent_level)
+  indent_level = indent_level or 2 -- Default indent of 2 spaces
+  local indent = string.rep(" ", indent_level)
+
+  -- If text is nil or empty, return an empty string with proper indentation
+  if not text or text == "" then
+    return indent
+  end
+
+  -- Replace any escaped newlines with actual newlines
+  text = text:gsub("\\n", "\n")
+
+  -- Split text into lines
+  local lines = vim.split(text, "\n")
+
+  -- Indent each line
+  for i, line in ipairs(lines) do
+    -- Empty lines still need indentation to maintain YAML block structure
+    lines[i] = indent .. line
+  end
+
+  -- Join lines back together
+  return vim.trim(table.concat(lines, "\n"))
+end
+
+-- Create a temporary YAML recipe file from the rendered template
+function M.create_recipe_file(instructions, prompt)
+  -- Create directly formatted YAML without using the template engine for the multi-line parts
+  local yaml_content = M.render_template('template/recipe.yaml', {
+    instructions = M.indent_for_yaml(instructions),
+    prompt = M.indent_for_yaml(prompt)
+  })
+
+  -- Create a temporary file
+  local temp_dir = vim.fn.fnamemodify(vim.fn.tempname(), ":h")
+  local temp_file = temp_dir .. "/goose_recipe_" .. os.time() .. ".yaml"
+
+  -- Write the directly formatted YAML to the temporary file
+  local file = io.open(temp_file, "w")
+  if not file then
+    error("Failed to create temporary recipe file")
+    return nil
+  end
+
+  file:write(yaml_content)
+  file:close()
+
+  local handle = io.popen('cat ' .. temp_file)
+  if not handle then return nil end
+  local result = handle:read("*a")
+  print(result)
+  handle:close()
+
+  return temp_file
 end
 
 function M.extract_tag(tag, text)

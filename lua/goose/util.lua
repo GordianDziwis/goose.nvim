@@ -128,6 +128,32 @@ function M.ansi_reset()
   return "\27[0m"
 end
 
+--- Get the project root directory and the relative path of a file
+-- @param file_path string: The absolute path of the file
+-- @return string, string: The project root directory and the path relative to it
+function M.get_project_root_and_relative_path(file_path)
+  -- Get project root directory (using git or current working directory)
+  local root_dir
+  local git_dir = vim.fn.systemlist("git rev-parse --show-toplevel 2>/dev/null")[1]
+  if git_dir and vim.v.shell_error == 0 then
+    root_dir = git_dir
+  else
+    root_dir = vim.fn.getcwd()
+  end
+
+  -- Get relative path
+  local relative_path
+  if root_dir and file_path:find(root_dir, 1, true) == 1 then
+    -- File is under the project root
+    relative_path = file_path:sub(#root_dir + 2) -- +2 to remove the trailing slash
+  else
+    -- File is outside the project
+    relative_path = file_path
+  end
+
+  return root_dir, relative_path
+end
+
 --- Convert a datetime string to a human-readable "time ago" format
 -- @param dateTime string: Datetime string (e.g., "2025-03-02 12:39:02 UTC")
 -- @return string: Human-readable time ago string (e.g., "2 hours ago")
