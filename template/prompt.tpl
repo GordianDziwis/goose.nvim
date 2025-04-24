@@ -1,9 +1,9 @@
 <? if current_file or mentioned_files or selections then ?>
   <additional-data>
-    Below are some potentially helpful/relevant pieces of information for figuring out to respond. **IGNORE** if not relevant to user query.
+    Below is context that may help answer the user query. **IGNORE** if not relevant.
     <? if current_file then ?>
       <current-file>
-        Path: <%= current_file.relative_path %>
+        Path: <%= current_file.path %>
       </current-file>
     <? end ?>
     <? if selections or mentioned_files then ?>

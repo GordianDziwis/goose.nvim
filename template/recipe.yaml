@@ -5,6 +5,11 @@ instructions: |
   <%= instructions %>
 prompt: |
   <%= prompt %>
+activities:
+- Suggest code improvements
+- Debug complex issues
+- Implement new features
+- Explain code functionality
 extensions:
 - type: builtin
   name: developer

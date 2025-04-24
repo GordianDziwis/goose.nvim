@@ -58,6 +58,7 @@ function M.execute(prompt, handlers)
     args = args,
     on_start = function()
       vim.schedule(function()
+        vim.defer_fn(M.cleanup_temp_files, 1000)
         handlers.on_start()
       end)
     end,
@@ -77,9 +78,6 @@ function M.execute(prompt, handlers)
     end,
     on_exit = function()
       vim.schedule(function()
-        -- Clean up temporary recipe files
-        M.cleanup_temp_files()
-
         handlers.on_exit()
       end)
     end
@@ -106,9 +104,6 @@ function M.stop(job)
       job:shutdown()
     end)
   end
-
-  -- Clean up temp files when stopping a job
-  M.cleanup_temp_files()
 end
 
 return M
