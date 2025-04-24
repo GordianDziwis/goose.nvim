@@ -21,7 +21,6 @@ This plugin provides a bridge between neovim and the [goose](https://github.com/
 ## 📑 Table of Contents
 
 - [Requirements](#-requirements)
-- [Compatibility](#-compatibility)
 - [Installation](#-installation)
 - [Configuration](#️-configuration)
 - [Usage](#-usage)
@@ -31,11 +30,6 @@ This plugin provides a bridge between neovim and the [goose](https://github.com/
 ## 📋 Requirements
 
 - Goose CLI installed and available (see [Setting up goose](#-setting-up-goose-cli) below)
-
-## ⚡ Compatibility
-
-This plugin is compatible with Goose CLI version **`1.0.18`**. 
-Other versions may work but are not guaranteed. If you encounter issues with newer Goose CLI versions, please report them in the issues section.
 
 ## 🚀 Installation
 
